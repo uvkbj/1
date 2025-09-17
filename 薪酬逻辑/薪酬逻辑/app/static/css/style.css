@@ -1,0 +1,331 @@
+﻿/*
+body {
+    padding: 40px;
+}
+
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1200px !important;
+    }
+}
+
+button {
+    font-size: 16px;
+    padding: 8px 16px;
+    margin: 10px 5px;
+    border: 1px solid #000;
+    background-color: white;
+    color: black;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    text-align: center !important;
+}
+
+input {
+    text-align: center !important;
+}
+
+button:hover {
+    background-color: black;
+    color: white;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+    margin: 0 auto;
+}
+
+table {
+    table-layout: fixed;
+}
+*/
+/* 表格单元格设置 */
+/*th, td {
+    border: 1px solid #ddd !important;
+    padding: 0 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+    overflow: hidden !important;
+}*/
+
+/* 表头样式 
+th {
+    background-color: #f0f0f0 !important;
+    font-weight: bold !important;
+    height: 42px !important;
+}*/
+
+/* 表格内的 input 和 select 全部占满
+td input.form-control,
+td select.form-select {
+    width: 100% !important;
+    height: 42px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 6px 8px !important;
+    text-align: center !important;
+} */
+
+/* 按钮样式优化（可选） 
+.btn-outline-black {
+    border: 1px solid black;
+    background-color: white;
+    color: black;
+    transition: all 0.2s ease;
+}
+
+input[disabled], select[disabled], textarea[disabled] {*/
+  /*   padding: 0 !important; 取消强制13px内边距，改用行高控制 
+    height: 100% !important;
+    background-color: black !important;
+    color: white !important;
+    cursor: not-allowed;
+}
+
+#textModalInput {
+    border: 1px solid #ccc;
+    padding: 6px;
+    border-radius: 4px;
+}
+
+.btn-outline-black {
+    border: 1px solid black;
+    background-color: white;
+    color: black;
+    transition: all 0.2s ease;
+}
+
+    .btn-outline-black:hover {
+        background-color: black;
+        color: white;
+    }*/
+
+/* 弹窗输入框居中 
+#textModal .modal-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#multiSelectOptions {
+    max-height: 300px;
+    overflow-y: auto;
+}
+*/
+/* 给每一列单独设宽 
+
+*/
+body {
+    padding: 40px;
+}
+
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1200px !important;
+    }
+}
+
+button {
+    font-size: 16px;
+    padding: 8px 16px;
+    margin: 10px 5px;
+    border: 1px solid #000;
+    background-color: white;
+    color: black;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    text-align: center !important;
+}
+
+    button:hover {
+        background-color: black;
+        color: white;
+    }
+
+input, select {
+    text-align: center !important;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+    margin: 0 auto;
+}
+
+table {
+    table-layout: fixed;
+}
+
+th, td {
+    border: 1px solid #ddd !important;
+    padding: 0 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+    overflow: hidden !important;
+}
+
+th {
+    background-color: #f0f0f0 !important;
+    font-weight: bold !important;
+    height: 42px !important;
+}
+
+td input.form-control,
+td select.form-select {
+    width: 100% !important;
+    height: 42px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 6px 8px !important;
+}
+
+.btn-outline-black {
+    border: 1px solid black;
+    background-color: white;
+    color: black;
+    transition: all 0.2s ease;
+}
+
+    .btn-outline-black:hover {
+        background-color: black;
+        color: white;
+    }
+
+input[disabled], select[disabled], textarea[disabled] {
+    padding: 0 !important;
+    height: 100% !important;
+    background-color: black !important;
+    color: white !important;
+    cursor: not-allowed;
+}
+
+#textModalInput {
+    border: 1px solid #ccc;
+    padding: 6px;
+    border-radius: 4px;
+}
+
+#textModal .modal-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#multiSelectOptions {
+    max-height: 300px;
+    overflow-y: auto;
+}
+.col_删除 {
+    width: 49px;
+}
+
+.col_姓名 {
+    width: 90px;
+}
+
+.col_日期\28年-月-日\29 {
+    width: 120px;
+}
+
+.col_推文内容 {
+    width: 300px;
+}
+
+.col_是否采用 {
+    width: 80px;
+}
+
+.col_最终推文中的字数 {
+    width: 140px;
+}
+
+.col_工时\28h\29 {
+    width: 60px;
+}
+
+.col_总和 {
+    width: 75px;
+}
+
+.col_id {
+    width: 40px;
+}
+
+.col_工作内容 {
+    width: 300px;
+}
+
+.col_是否原创 {
+    width: 80px;
+}
+
+.col_海报、壁纸、尾图数量 {
+    width: 170px;
+}
+
+.col_是否广受好评1 {
+    width: 120px;
+}
+
+.col_可视化设计、H5制作、手绘数量 {
+    width: 250px;
+}
+
+.col_是否广受好评2 {
+    width: 120px;
+}
+
+.col_根据反馈意见修改的工作时长\28H\29 {
+    width: 250px;
+}
+
+.col_工时\28H\29 {
+    width: 60px;
+}
+
+.col_工作类型 {
+    width: 115px;
+}
+
+.col_拍摄时长\28h\29 {
+    width: 110px;
+}
+
+.col_整理时长\28h\29 {
+    width: 110px;
+}
+
+.col_视频时长\28min\29 {
+    width: 120px;
+}
+
+.col_有哪些工作由记者团完成 {
+    width: 250px;
+}
+
+.col_你负责了哪些工作 {
+    width: 200px;
+}
+
+th[class="col_视频单价(￥/min,[60-120])"] {
+    width: 230px;
+}
+
+.col_薪酬 {
+    width: 60px;
+}
+
+.col_劳务费 {
+    width: 100px;
+}

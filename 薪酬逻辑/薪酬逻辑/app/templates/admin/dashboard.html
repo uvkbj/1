@@ -1,0 +1,473 @@
+﻿<!--
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <title>管理员主页</title>
+    <style>
+        body {
+            font-family: "Noto Sans SC", sans-serif;
+            background-color: #fafafa;
+            color: #111;
+            padding: 60px;
+            margin: 0;
+        }
+
+        h2, h3 {
+            text-align: center;
+            font-weight: 500;
+            margin-bottom: 30px;
+        }
+
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        select, button {
+            font-size: 15px;
+            padding: 10px 18px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background-color: #fff;
+            color: #111;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            button:hover {
+                background-color: #111;
+                color: white;
+            }
+
+        label {
+            margin-right: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            font-weight: 500;
+        }
+
+        .delete-form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 40px;
+        }
+
+            .delete-form label {
+                font-size: 14px;
+            }
+
+        .checkbox-label {
+            margin-right: 10px;
+        }
+
+        .info-note {
+            font-size: 13px;
+            color: #666;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px;
+            }
+
+            form, .delete-form {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            select, button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>管理员薪酬数据查看</h2>
+
+    <form method="POST">
+        <label>选择数据视图：</label>
+        <select name="department" required>
+            <option value="文案部" {% if dept=='文案部' %}selected{% endif %}>文案部</option>
+            <option value="编辑部" {% if dept=='编辑部' %}selected{% endif %}>编辑部</option>
+            <option value="影视部" {% if dept=='影视部' %}selected{% endif %}>影视部</option>
+            <option value="其他" {% if dept=='其他' %}selected{% endif %}>其他</option>
+            <option value="总计表格" {% if dept=='总计表格' %}selected{% endif %}>总计表格</option>
+        </select>
+
+        <label>选择月份：</label>
+        <select id="month" name="month" required>
+            {% for m in months %}
+            <option value="{{ m }}" {% if month==m %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" name="action" value="query">查询</button>
+        <button type="button" onclick="downloadZip()">导出</button>
+        <span class="info-note">(导出需等待，切勿重复点击)</span>
+    </form>
+
+    {% if records %}
+    <h3>{{month}} {{dept}}查询结果：</h3>
+    <table>
+        <tr>
+            {% for col in columns %}
+            <th>{{ col }}</th>
+            {% endfor %}
+        </tr>
+        {% for row in records %}
+        <tr>
+            {% for item in row %}
+            <td>{{ item }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <h3>没有查询到数据</h3>
+    {% endif %}
+
+    <form method="POST" class="delete-form">
+        <label>请选择需要删除的月份：</label>
+        {% for m in months %}
+        <label class="checkbox-label">
+            <input type="checkbox" id="{{m}}" name="{{m}}" value="{{m}}">
+            {{m}}
+        </label>
+        {% endfor %}
+        <button type="button" name="delete_button" onclick="multidelete()">删除</button>
+    </form>
+
+    <script>
+function downloadZip() {
+const month = document.querySelector('#month').value;
+
+fetch(`/admin/export?month=${month}`)
+.then(response => {
+    if (!response.ok) {
+        alert("导出失败，请稍后重试");
+        throw new Error("导出失败");
+    }
+    const disposition = response.headers.get("Content-Disposition");
+    const filename = disposition?.split("filename=")[1]?.replaceAll('"', '') || `salary_export_${month}.zip`;
+
+    return response.blob().then(blob => ({ blob, filename }));
+})
+.then(({ blob, filename }) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+})
+.catch(error => {
+    console.error(error);
+    alert("下载失败");
+});
+}
+function multidelete() {
+    if (confirm("确定要删除这些数据吗？")) {
+        var month = {{ months | tojson | safe}};
+        var month_delete = [];
+        for (const m of month) {
+            if (document.querySelector(`input[name="${m}"]`).checked) {
+                month_delete.push(document.querySelector(`input[name="${m}"]`).value);
+            }
+        }
+        fetch("/admin/multidelete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                month_delete: month_delete
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("删除成功");
+            } else {
+                alert("删除失败: " + data.error);
+            }
+        })
+    }
+}
+    </script>
+
+
+</body>
+</html>
+-->
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>管理员主页</title>
+
+    <!-- Bootstrap 样式 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        /* ✅ 你的样式保持原样，无需变更 */
+        body {
+            font-family: "Noto Sans SC", sans-serif;
+            background-color: #fafafa;
+            color: #111;
+            padding: 60px;
+            margin: 0;
+        }
+
+        h2, h3 {
+            text-align: center;
+            font-weight: 500;
+            margin-bottom: 30px;
+        }
+
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        select, button {
+            font-size: 15px;
+            padding: 10px 18px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background-color: #fff;
+            color: #111;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            button:hover {
+                background-color: #111;
+                color: white;
+            }
+
+        label {
+            margin-right: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            font-weight: 500;
+        }
+
+        .delete-form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 40px;
+        }
+
+            .delete-form label {
+                font-size: 14px;
+            }
+
+        .checkbox-label {
+            margin-right: 10px;
+        }
+
+        .info-note {
+            font-size: 13px;
+            color: #666;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px;
+            }
+
+            form, .delete-form {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            select, button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>管理员薪酬数据查看</h2>
+    </header>
+
+    <main>
+        <!-- 查询表单 -->
+        <form method="POST">
+            <label>选择数据视图：</label>
+            <select name="department" required>
+                <option value="文案部" {% if dept=='文案部' %}selected{% endif %}>文案部</option>
+                <option value="编辑部" {% if dept=='编辑部' %}selected{% endif %}>编辑部</option>
+                <option value="影视部" {% if dept=='影视部' %}selected{% endif %}>影视部</option>
+                <option value="其他" {% if dept=='其他' %}selected{% endif %}>其他</option>
+                <option value="总计表格" {% if dept=='总计表格' %}selected{% endif %}>总计表格</option>
+            </select>
+
+            <label>选择月份：</label>
+            <select id="month" name="month" required>
+                {% for m in months %}
+                <option value="{{ m }}" {% if month==m %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit" name="action" value="query">查询</button>
+            <button type="button" onclick="downloadZip()">导出</button>
+            <span class="info-note">(导出需等待，切勿重复点击)</span>
+        </form>
+
+        <!-- 查询结果 -->
+        {% if records %}
+        <section>
+            <h3>{{ month }} {{ dept }}查询结果：</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            {% for col in columns %}
+                            <th>{{ col }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in records %}
+                        <tr>
+                            {% for item in row %}
+                            <td>{{ item }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% else %}
+        <section>
+            <h3>没有查询到数据</h3>
+        </section>
+        {% endif %}
+
+        <!-- 删除表单 -->
+        <form method="POST" class="delete-form">
+            <label>请选择需要删除的月份：</label>
+            {% for m in months %}
+            <label class="checkbox-label">
+                <input type="checkbox" id="{{ m }}" name="{{ m }}" value="{{ m }}">
+                {{ m }}
+            </label>
+            {% endfor %}
+            <button type="button" name="delete_button" onclick="multidelete()">删除</button>
+        </form>
+    </main>
+
+    <footer class="text-center mt-5">
+        <p>&copy; 2025 管理员系统</p>
+    </footer>
+
+    <!-- JS 脚本 -->
+    <script>
+        function downloadZip() {
+            const month = document.querySelector('#month').value;
+
+            fetch(`/admin/export?month=${month}`)
+                .then(response => {
+                    if (!response.ok) {
+                        alert("导出失败，请稍后重试");
+                        throw new Error("导出失败");
+                    }
+                    const disposition = response.headers.get("Content-Disposition");
+                    const filename = disposition?.split("filename=")[1]?.replaceAll('"', '') || `salary_export_${month}.zip`;
+
+                    return response.blob().then(blob => ({ blob, filename }));
+                })
+                .then(({ blob, filename }) => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("下载失败");
+                });
+        }
+
+        function multidelete() {
+            if (confirm("确定要删除这些数据吗？")) {
+                var month = {{ months | tojson | safe }};
+                var month_delete = [];
+                for (const m of month) {
+                    if (document.querySelector(`input[name="${m}"]`).checked) {
+                        month_delete.push(document.querySelector(`input[name="${m}"]`).value);
+                    }
+                }
+                fetch("/admin/multidelete", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ month_delete: month_delete })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("删除成功");
+                    } else {
+                        alert("删除失败: " + data.error);
+                    }
+                })
+            }
+        }
+    </script>
+</body>
+</html>
